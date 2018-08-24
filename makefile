@@ -1,5 +1,7 @@
+
+
 build:
-	go build
+	go build plank
 
 run:
-	./plank
+	./plank -p 8081
