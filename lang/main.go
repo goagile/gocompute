@@ -3,18 +3,34 @@ package lang
 import "fmt"
 
 //
-// Number
+// Num
 //
-type number struct {
+type num struct {
 	value int
 }
 
-func Number(value int) *number {
-	return &number{value}
+func Num(value int) *num {
+	return &num{value}
 }
 
-func (n *number) String() string {
+func (n *num) String() string {
 	return fmt.Sprint(n.value)
+}
+
+func (n *num) Value() int {
+	return n.value
+}
+
+func (n *num) Equal(other *num) bool {
+	return n.Value() == other.Value()
+}
+
+func (n *num) Foldable() bool {
+	return false
+}
+
+func (n *num) Fold() *num {
+	return Num(n.value)
 }
 
 //
@@ -32,6 +48,10 @@ func (s *sum) String() string {
 	return fmt.Sprintf(`%v + %v`, s.a, s.b)
 }
 
+func (n *sum) Foldable() bool {
+	return true
+}
+
 //
 // Mul
 //
@@ -45,4 +65,8 @@ func Mul(a, b fmt.Stringer) *mul {
 
 func (m *mul) String() string {
 	return fmt.Sprintf(`%v * %v`, m.a, m.b)
+}
+
+func (n *mul) Foldable() bool {
+	return true
 }
