@@ -75,6 +75,29 @@ func Test_Sum_String(t *testing.T) {
 	}
 }
 
+func Test_Sum_Value(t *testing.T) {
+	want := 7
+	x := Sum(Num(5), Num(2))
+
+	got := x.Value()
+
+	if got != want {
+		t.Fatalf("\n got : %v \n want: %v", got, want)
+	}
+}
+
+func Test_Sum_Equal(t *testing.T) {
+	want := true
+	a := Sum(Num(5), Num(2))
+	b := Sum(Num(5), Num(2))
+
+	got := a.Equal(b)
+
+	if got != want {
+		t.Fatalf("\n got : %v \n want: %v", got, want)
+	}
+}
+
 func Test_Sum_Foldable(t *testing.T) {
 	want := true
 	x := Sum(Num(5), Num(2))
@@ -82,6 +105,17 @@ func Test_Sum_Foldable(t *testing.T) {
 	got := x.Foldable()
 
 	if got != want {
+		t.Fatalf("\n got : %v \n want: %v", got, want)
+	}
+}
+
+func Test_Sum_Fold(t *testing.T) {
+	want := Num(7)
+	x := Sum(Num(5), Num(2))
+
+	got := x.Fold()
+
+	if !got.Equal(want) {
 		t.Fatalf("\n got : %v \n want: %v", got, want)
 	}
 }
@@ -100,6 +134,29 @@ func Test_Mul_String(t *testing.T) {
 	}
 }
 
+func Test_Mul_Value(t *testing.T) {
+	want := 10
+	x := Mul(Num(5), Num(2))
+
+	got := x.Value()
+
+	if got != want {
+		t.Fatalf("\n got : %v \n want: %v", got, want)
+	}
+}
+
+func Test_Mul_Equal(t *testing.T) {
+	want := true
+	a := Mul(Num(5), Num(2))
+	b := Mul(Num(5), Num(2))
+
+	got := a.Equal(b)
+
+	if got != want {
+		t.Fatalf("\n got : %v \n want: %v", got, want)
+	}
+}
+
 func Test_Mul_Foldable(t *testing.T) {
 	want := true
 	x := Mul(Num(5), Num(2))
@@ -107,6 +164,17 @@ func Test_Mul_Foldable(t *testing.T) {
 	got := x.Foldable()
 
 	if got != want {
+		t.Fatalf("\n got : %v \n want: %v", got, want)
+	}
+}
+
+func Test_Mul_Fold(t *testing.T) {
+	want := Num(10)
+	x := Mul(Num(5), Num(2))
+
+	got := x.Fold()
+
+	if !got.Equal(want) {
 		t.Fatalf("\n got : %v \n want: %v", got, want)
 	}
 }

@@ -3,6 +3,17 @@ package lang
 import "fmt"
 
 //
+// Exp
+//
+type Exp interface {
+	fmt.Stringer
+	Value() int
+	Equal(other Exp) bool
+	Foldable() bool
+	Fold() Exp
+}
+
+//
 // Num
 //
 type num struct {
@@ -21,7 +32,7 @@ func (n *num) Value() int {
 	return n.value
 }
 
-func (n *num) Equal(other *num) bool {
+func (n *num) Equal(other Exp) bool {
 	return n.Value() == other.Value()
 }
 
@@ -29,7 +40,7 @@ func (n *num) Foldable() bool {
 	return false
 }
 
-func (n *num) Fold() *num {
+func (n *num) Fold() Exp {
 	return Num(n.value)
 }
 
@@ -37,10 +48,10 @@ func (n *num) Fold() *num {
 // Sum
 //
 type sum struct {
-	a, b fmt.Stringer
+	a, b Exp
 }
 
-func Sum(a, b fmt.Stringer) *sum {
+func Sum(a, b Exp) *sum {
 	return &sum{a, b}
 }
 
@@ -48,18 +59,30 @@ func (s *sum) String() string {
 	return fmt.Sprintf(`%v + %v`, s.a, s.b)
 }
 
-func (n *sum) Foldable() bool {
+func (s *sum) Value() int {
+	return s.a.Value() + s.b.Value()
+}
+
+func (s *sum) Equal(other Exp) bool {
+	return (s.Value() == other.Value())
+}
+
+func (s *sum) Foldable() bool {
 	return true
+}
+
+func (s *sum) Fold() Exp {
+	return Num(s.Value())
 }
 
 //
 // Mul
 //
 type mul struct {
-	a, b fmt.Stringer
+	a, b Exp
 }
 
-func Mul(a, b fmt.Stringer) *mul {
+func Mul(a, b Exp) *mul {
 	return &mul{a, b}
 }
 
@@ -67,6 +90,18 @@ func (m *mul) String() string {
 	return fmt.Sprintf(`%v * %v`, m.a, m.b)
 }
 
-func (n *mul) Foldable() bool {
+func (m *mul) Value() int {
+	return m.a.Value() * m.b.Value()
+}
+
+func (m *mul) Equal(other Exp) bool {
+	return m.Value() == other.Value()
+}
+
+func (m *mul) Foldable() bool {
 	return true
+}
+
+func (m *mul) Fold() Exp {
+	return Num(m.Value())
 }
