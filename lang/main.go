@@ -72,6 +72,12 @@ func (s *sum) Foldable() bool {
 }
 
 func (s *sum) Fold() Exp {
+	if s.a.Foldable() {
+		return Sum(s.a.Fold(), s.b)
+	}
+	if s.b.Foldable() {
+		return Sum(s.a, s.b.Fold())
+	}
 	return Num(s.Value())
 }
 
@@ -103,5 +109,11 @@ func (m *mul) Foldable() bool {
 }
 
 func (m *mul) Fold() Exp {
+	if m.a.Foldable() {
+		return Mul(m.a.Fold(), m.b)
+	}
+	if m.b.Foldable() {
+		return Mul(m.a, m.b.Fold())
+	}
 	return Num(m.Value())
 }
