@@ -117,3 +117,21 @@ func (m *mul) Fold() Exp {
 	}
 	return Num(m.Value())
 }
+
+//
+// Machine
+//
+type machine struct {
+	exp Exp
+}
+
+func Machine(exp Exp) *machine {
+	return &machine{exp}
+}
+
+func (m *machine) Run() Exp {
+	for m.exp.Foldable() {
+		m.exp = m.exp.Fold()
+	}
+	return m.exp
+}

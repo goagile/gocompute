@@ -363,3 +363,53 @@ func Test_Simple_Expression_String(t *testing.T) {
 		t.Fatalf("\n got : %v \n want: %v", got, want)
 	}
 }
+
+func Test_Simple_Expression_Fold(t *testing.T) {
+	strigns := []string{
+		"5 + 2 + 3 * 6",
+		"7 + 3 * 6",
+		"7 + 18",
+		"25",
+		"25",
+	}
+
+	x := Sum(
+		Sum(Num(5), Num(2)),
+		Mul(Num(3), Num(6)),
+	)
+
+	expstrings := []string{
+		x.String(),
+		x.Fold().String(),
+		x.Fold().Fold().String(),
+		x.Fold().Fold().Fold().String(),
+		x.Fold().Fold().Fold().Fold().String(), // Num
+	}
+
+	for i, want := range strigns {
+		got := expstrings[i]
+		if got != want {
+			t.Fatalf("\n got : %v \n want: %v", got, want)
+		}
+	}
+}
+
+//
+// Machine
+//
+func Test_Machine_Fold(t *testing.T) {
+	want := 25
+
+	x := Machine(
+		Sum(
+			Sum(Num(5), Num(2)),
+			Mul(Num(3), Num(6)),
+		),
+	).Run()
+
+	got := x.Value()
+
+	if got != want {
+		t.Fatalf("\n got : %v \n want: %v", got, want)
+	}
+}
