@@ -10,7 +10,41 @@ type Exp interface {
 	Value() int
 	Equal(other Exp) bool
 	Foldable() bool
-	Fold() Exp
+	IsNil() bool
+	Fold(*env) Exp
+}
+
+//
+// Nil
+//
+type nilexp struct{}
+
+func Nil() *nilexp {
+	return &nilexp{}
+}
+
+func (n *nilexp) String() string {
+	return "nil"
+}
+
+func (n *nilexp) Value() int {
+	return 0
+}
+
+func (n *nilexp) Equal(other Exp) bool {
+	return n.Value() == other.Value()
+}
+
+func (n *nilexp) Foldable() bool {
+	return false
+}
+
+func (n *nilexp) Fold(env *env) Exp {
+	return Nil()
+}
+
+func (n *nilexp) IsNil() bool {
+	return true
 }
 
 //
@@ -40,8 +74,12 @@ func (n *num) Foldable() bool {
 	return false
 }
 
-func (n *num) Fold() Exp {
+func (n *num) Fold(env *env) Exp {
 	return Num(n.value)
+}
+
+func (n *num) IsNil() bool {
+	return false
 }
 
 //
@@ -71,14 +109,18 @@ func (s *sum) Foldable() bool {
 	return true
 }
 
-func (s *sum) Fold() Exp {
+func (s *sum) Fold(env *env) Exp {
 	if s.a.Foldable() {
-		return Sum(s.a.Fold(), s.b)
+		return Sum(s.a.Fold(env), s.b)
 	}
 	if s.b.Foldable() {
-		return Sum(s.a, s.b.Fold())
+		return Sum(s.a, s.b.Fold(env))
 	}
 	return Num(s.Value())
+}
+
+func (s *sum) IsNil() bool {
+	return false
 }
 
 //
@@ -108,14 +150,78 @@ func (m *mul) Foldable() bool {
 	return true
 }
 
-func (m *mul) Fold() Exp {
+func (m *mul) Fold(env *env) Exp {
 	if m.a.Foldable() {
-		return Mul(m.a.Fold(), m.b)
+		return Mul(m.a.Fold(env), m.b)
 	}
 	if m.b.Foldable() {
-		return Mul(m.a, m.b.Fold())
+		return Mul(m.a, m.b.Fold(env))
 	}
 	return Num(m.Value())
+}
+
+func (m *mul) IsNil() bool {
+	return false
+}
+
+//
+// Var
+//
+type variable struct {
+	name string
+}
+
+func Var(name string) *variable {
+	return &variable{name}
+}
+
+func (v *variable) String() string {
+	return v.name
+}
+
+func (v *variable) Value() int {
+	return 0
+}
+
+func (v *variable) Equal(other Exp) bool {
+	return false
+}
+
+func (v *variable) Foldable() bool {
+	return true
+}
+
+func (v *variable) Fold(env *env) Exp {
+	return env.Get(v.name)
+}
+
+func (v *variable) IsNil() bool {
+	return false
+}
+
+//
+// Env
+//
+type env struct {
+	state map[string]Exp
+}
+
+func Env() *env {
+	e := new(env)
+	e.state = map[string]Exp{}
+	return e
+}
+
+func (e *env) Put(name string, exp Exp) {
+	e.state[name] = exp
+}
+
+func (e *env) Get(name string) Exp {
+	exp, ok := e.state[name]
+	if !ok {
+		return Nil()
+	}
+	return exp
 }
 
 //
@@ -129,9 +235,9 @@ func Machine(exp Exp) *machine {
 	return &machine{exp}
 }
 
-func (m *machine) Run() Exp {
+func (m *machine) Run(env *env) Exp {
 	for m.exp.Foldable() {
-		m.exp = m.exp.Fold()
+		m.exp = m.exp.Fold(env)
 	}
 	return m.exp
 }
